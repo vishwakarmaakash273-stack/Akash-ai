@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akash AI - Video Maker</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b1020;
+  color: white;
+}
+
+header {
+  padding: 22px 16px;
+  text-align: center;
+  background: linear-gradient(135deg, #6417e8, #087cf5);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+header p {
+  margin-bottom: 0;
+}
+
+.container {
+  max-width: 520px;
+  margin: auto;
+  padding: 18px;
+}
+
+.card {
+  background: #171e32;
+  padding: 18px;
+  border-radius: 16px;
+  margin-bottom: 18px;
+  border: 1px solid #303b58;
+}
+
+h2 {
+  font-size: 19px;
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin: 14px 0 8px;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 13px;
+  border-radius: 9px;
+  border: 1px solid #46516d;
+  background: #0b1020;
+  color: white;
+  font-size: 15px;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 10px;
+  margin-top: 14px;
+  background: #7c3aed;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:active {
+  opacity: 0.8;
+}
+
+.secondary {
+  background: #243451;
+}
+
+#preview {
+  width: 100%;
+  margin-top: 14px;
+  border-radius: 10px;
+  display: none;
+}
+
+#status {
+  color: #a7f3d0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+footer {
+  text-align: center;
+  color: #a8b2ca;
+  padding: 22px;
+  font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>✨ Akash AI</h1>
+  <p>AI Video Maker · Create Your Story</p>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>📸 फोटो या वीडियो चुनें</h2>
+
+    <label for="media">अपने फोन से फाइल चुनें</label>
+    <input
+      id="media"
+      type="file"
+      accept="image/*,video/*"
+    >
+
+    <img id="preview" alt="Photo preview">
+
+    <video
+      id="videoPreview"
+      controls
+      style="display:none;width:100%;margin-top:14px;border-radius:10px">
+    </video>
+  </section>
+
+  <section class="card">
+    <h2>🎬 अपनी वीडियो स्टोरी बनाएँ</h2>
+
+    <label for="prompt">वीडियो में क्या दिखाना है?</label>
+
+    <textarea
+      id="prompt"
+      placeholder="उदाहरण: एक प्यारा 3D कार्टून बच्चा जंगल में घूम रहा है और हिंदी में बात कर रहा है..."
+    ></textarea>
+
+    <label for="style">वीडियो स्टाइल</label>
+
+    <select id="style">
+      <option>3D Cartoon</option>
+      <option>Realistic</option>
+      <option>Anime</option>
+      <option>Cinematic</option>
+      <option>Fantasy</option>
+    </select>
+
+    <label for="duration">वीडियो की लंबाई</label>
+
+    <select id="duration">
+      <option value="5">5 सेकंड</option>
+      <option value="10">10 सेकंड</option>
+      <option value="15">15 सेकंड</option>
+      <option value="30">30 सेकंड</option>
+    </select>
+
+    <button onclick="createRequest()">
+      ✨ AI वीडियो बनाने की तैयारी करें
+    </button>
+
+    <p id="status" aria-live="polite"></p>
+  </section>
+
+  <section class="card">
+    <h2>💾 वीडियो सेव करें</h2>
+
+    <p>
+      जब आपके पास बनी हुई वीडियो फाइल हो,
+      तो उसे यहाँ चुनकर अपने फोन में सेव कर सकते हैं।
+    </p>
+
+    <input id="saveFile" type="file" accept="video/*">
+
+    <button class="secondary" onclick="saveVideo()">
+      📥 वीडियो डाउनलोड करें
+    </button>
+  </section>
+
+</main>
+
+<footer>
+  Akash AI · Made with ❤️
+</footer>
+
+<script>
+const media = document.getElementById("media");
+const imagePreview = document.getElementById("preview");
+const videoPreview = document.getElementById("videoPreview");
+const status = document.getElementById("status");
+
+media.addEventListener("change", function () {
+  const file = this.files[0];
+
+  imagePreview.style.display = "none";
+  videoPreview.style.display = "none";
+
+  if (!file) return;
+
+  const url = URL.createObjectURL(file);
+
+  if (file.type.startsWith("image/")) {
+    imagePreview.src = url;
+    imagePreview.style.display = "block";
+  } else if (file.type.startsWith("video/")) {
+    videoPreview.src = url;
+    videoPreview.style.display = "block";
+  }
+});
+
+function createRequest() {
+  const prompt = document.getElementById("prompt").value.trim();
+  const style = document.getElementById("style").value;
+  const duration = document.getElementById("duration").value;
+
+  if (!prompt) {
+    status.textContent = "पहले अपनी वीडियो स्टोरी लिखें।";
+    return;
+  }
+
+  const request = {
+    prompt: prompt,
+    style: style,
+    duration_seconds: Number(duration)
+  };
+
+  status.textContent =
+    "आपकी वीडियो बनाने की जानकारी तैयार है। " +
+    "अभी AI वीडियो जनरेशन सर्विस कनेक्ट नहीं है, इसलिए वीडियो " +
+    "अभी जनरेट नहीं होगी।";
+
+  console.log("Akash AI video request:", request);
+}
+
+function saveVideo() {
+  const file = document.getElementById("saveFile").files[0];
+
+  if (!file) {
+    status.textContent = "पहले अपने फोन से वीडियो फाइल चुनें।";
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  status.textContent = "वीडियो डाउनलोड करने का अनुरोध भेज दिया गया।";
+}
+</script>
+
+</body>
+  </html>
